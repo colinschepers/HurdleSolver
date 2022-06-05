@@ -1,7 +1,7 @@
 # Hurdle Solver 
 This application aims at helping to beat Hurdle (https://playhurdle.vercel.app), which is a Wordle meets Mastermind game.
 
-You can check out the application by **clicking the screenshot**.
+You can check out the application by **clicking the screenshot below**.
 
 <a href="https://share.streamlit.io/colinschepers/hurdlesolver"><img align="center" src="./screenshot.png" alt="" title="A simple Hurdle Solver" width="100%"/></a>
 

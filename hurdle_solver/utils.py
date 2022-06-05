@@ -1,47 +1,50 @@
 from collections import defaultdict
-from functools import lru_cache
 from math import log
-from typing import List, Tuple
+from typing import List
 from urllib import request
 
-
-@lru_cache(maxsize=None)
-def evaluate(guess: str, solution: str) -> Tuple[int, int]:
-    """
-    Evaluates a guess with the known solution.
-    :param guess: the guessed word
-    :param solution: the solution
-    :return: tuple of the number of green and the number of yellow characters
-    """
-    num_green = 0
-    num_yellow = 0
-
-    n = len(guess)
-    used = [False] * n
-
-    for i in range(n):
-        if guess[i] == solution[i]:
-            num_green += 1
-            continue
-        for j in range(n):
-            if guess[i] == solution[j] and guess[j] != solution[j] and not used[j]:
-                num_yellow += 1
-                used[j] = True
-                break
-
-    return num_green, num_yellow
+from hurdle_solver.evaluator import Evaluator
 
 
-def entropy(guess: str, solutions: List[str]) -> float:
+class LimitedSizeMaxList(list):
+    def __init__(self, size_limit: int = None):
+        super().__init__()
+        self.size_limit = size_limit
+
+    def __len__(self):
+        return super().__len__()
+
+    def insert(self, index, value):
+        super().insert(index, value)
+        self._check_size_limit()
+
+    def append(self, value):
+        if not self.size_limit or len(self) < self.size_limit or value > self[-1]:
+            for i in range(len(self)):
+                if value > self[i]:
+                    self.insert(i, value)
+                    return
+            else:
+                super().append(value)
+                self._check_size_limit()
+
+    def _check_size_limit(self):
+        if self.size_limit is not None:
+            while len(self) > self.size_limit:
+                self.pop()
+
+
+def entropy(guess: str, solutions: List[str], evaluator: Evaluator) -> float:
     """
     Calculates the entropy of a guess given a list of possible solutions.
     :param guess: the guessed word
     :param solutions: a list of remaining words, i.e. possible solutions of a game
+    :param evaluator: an evaluator
     :return: the entropy, a measure of how random something is
     """
     counts = defaultdict(int)
     for solution in solutions:
-        key = evaluate(guess, solution)
+        key = evaluator.evaluate(guess, solution)
         counts[key] += 1
 
     result = 0

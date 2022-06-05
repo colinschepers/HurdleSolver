@@ -1,6 +1,6 @@
 import pytest
 
-from hurdle_solver.utils import evaluate
+from hurdle_solver.evaluator import Evaluator
 
 
 @pytest.mark.parametrize("guess, solution, num_green, num_yellow", [
@@ -12,6 +12,6 @@ from hurdle_solver.utils import evaluate
     ("moose", "moose", 5, 0)
 ])
 def test_evaluate(guess, solution, num_green, num_yellow):
-    actual_num_green, actual_num_yellow = evaluate(guess, solution)
+    actual_num_green, actual_num_yellow = Evaluator().evaluate(guess, solution)
     assert actual_num_green == num_green, "number of greens do not match"
     assert actual_num_yellow == num_yellow, "number of yellows do not match"

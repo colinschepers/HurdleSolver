@@ -1,9 +1,10 @@
+import asyncio
+from itertools import islice
 from typing import List, Tuple
 
 import pandas as pd
 import streamlit as st
 
-from hurdle_solver.evaluator import Evaluator
 from hurdle_solver.solver import Solver
 from hurdle_solver.utils import get_all_words, LimitedSizeMaxList
 
@@ -26,13 +27,8 @@ def get_vocab():
     return set(get_all_words())
 
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
-def get_evaluator() -> Evaluator:
-    return Evaluator.load(CACHE_PATH)
-
-
 def get_solver() -> Solver:
-    solver = Solver(get_vocab(), get_evaluator())
+    solver = Solver(get_vocab())
     for guess, num_green, num_yellow in get_game_state():
         solver.add_information(guess, num_green, num_yellow)
     return solver
@@ -54,9 +50,10 @@ def highlight_cols(df: pd.DataFrame):
 
 def get_guess_options():
     solver = get_solver()
-    suggestions = set(solver.get_suggestions())
-    other_words = [w for d, w in solver.word_distances if w not in suggestions]
-    return list(suggestions) + other_words
+    suggestions = solver.get_suggestions()
+    lookup = set(suggestions)
+    other_words = [w for w, _ in solver.word_distances if w not in lookup]
+    return suggestions + other_words
 
 
 def get_dataframe():
@@ -94,25 +91,8 @@ def run_dashboard():
         guess_placeholder.selectbox('Guess', options=get_guess_options(), key="guess_updated")
         dataframe_placeholder.write(get_dataframe().to_html(), unsafe_allow_html=True, key="dataframe_updated")
 
-    suggestions_placeholder = st.empty()
-    suggestions_placeholder.table(pd.DataFrame([], columns=["Suggestion", "Score"]))
-
-    solver = get_solver()
-    scored_suggestions = solver.get_scored_suggestions()
-    suggestions = LimitedSizeMaxList(SUGGESTION_LIMIT)
-    for suggestion, score in scored_suggestions:
-        before = suggestions[-1] if suggestions else None
-        suggestions.append((score, suggestion))
-
-        df = pd.DataFrame([(suggestion, score) for score, suggestion in suggestions],
-                          columns=["Suggestion", "Score"])
-        suggestions_placeholder.table(df)
-
-    best_suggestions = set(suggestion for _, suggestion in suggestions)
-    other_words = [w for w in get_guess_options() if w not in best_suggestions]
-    guess_placeholder.selectbox('Guess', options=list(best_suggestions) + other_words, key="guess_updated")
-
-    get_evaluator().save(CACHE_PATH)
+    df = pd.DataFrame(get_solver().get_scored_suggestions()[:SUGGESTION_LIMIT], columns=["Suggestion", "Score"])
+    st.table(df)
 
 
 if __name__ == '__main__':

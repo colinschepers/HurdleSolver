@@ -2,7 +2,6 @@ import argparse
 import sys
 from typing import List
 
-from hurdle_solver.evaluator import Evaluator
 from hurdle_solver.solver import Solver
 from hurdle_solver.utils import get_all_words
 
@@ -12,8 +11,7 @@ SUGGESTION_LIMIT = 50
 
 def main(guesses: List[str], num_greens: List[int], num_yellows: List[int]):
     vocab = set(get_all_words())
-    evaluator = Evaluator.load(CACHE_PATH)
-    solver = Solver(vocab, evaluator)
+    solver = Solver(vocab)
 
     for guess, num_green, num_yellow in zip(guesses, num_greens, num_yellows):
         solver.add_information(guess, num_green, num_yellow)

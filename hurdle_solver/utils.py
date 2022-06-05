@@ -1,9 +1,8 @@
 from collections import defaultdict
+from functools import lru_cache
 from math import log
-from typing import List
+from typing import List, Tuple
 from urllib import request
-
-from hurdle_solver.evaluator import Evaluator
 
 
 class LimitedSizeMaxList(list):
@@ -34,7 +33,34 @@ class LimitedSizeMaxList(list):
                 self.pop()
 
 
-def entropy(guess: str, solutions: List[str], evaluator: Evaluator) -> float:
+@lru_cache(maxsize=10000000)
+def evaluate(guess: str, solution: str) -> Tuple[int, int]:
+    """
+    Evaluates a guess with the known solution.
+    :param guess: the guessed word
+    :param solution: the solution
+    :return: tuple of the number of green and the number of yellow characters
+    """
+    num_green = 0
+    num_yellow = 0
+
+    n = len(guess)
+    used = [False] * n
+
+    for i in range(n):
+        if guess[i] == solution[i]:
+            num_green += 1
+            continue
+        for j in range(n):
+            if guess[i] == solution[j] and guess[j] != solution[j] and not used[j]:
+                num_yellow += 1
+                used[j] = True
+                break
+
+    return num_green, num_yellow
+
+
+def entropy(guess: str, solutions: List[str]) -> float:
     """
     Calculates the entropy of a guess given a list of possible solutions.
     :param guess: the guessed word
@@ -44,7 +70,7 @@ def entropy(guess: str, solutions: List[str], evaluator: Evaluator) -> float:
     """
     counts = defaultdict(int)
     for solution in solutions:
-        key = evaluator.evaluate(guess, solution)
+        key = evaluate(guess, solution)
         counts[key] += 1
 
     result = 0

@@ -1,15 +1,12 @@
-import asyncio
-from itertools import islice
 from typing import List, Tuple
 
 import pandas as pd
 import streamlit as st
 
 from hurdle_solver.solver import Solver
-from hurdle_solver.utils import get_all_words, LimitedSizeMaxList
+from hurdle_solver.utils import get_all_words
 
-CACHE_PATH = "evaluator.cache"
-SUGGESTION_LIMIT = 10
+TABLE_ROW_LIMIT = 1000
 STYLING_JS = """
     <style>
         footer {visibility: hidden;}
@@ -49,11 +46,11 @@ def highlight_cols(df: pd.DataFrame):
 
 
 def get_guess_options():
-    solver = get_solver()
-    suggestions = solver.get_suggestions()
-    lookup = set(suggestions)
-    other_words = [w for w, _ in solver.word_distances if w not in lookup]
-    return suggestions + other_words
+    return get_solver().get_suggestions()
+
+
+def get_scored_suggestions():
+    return get_solver().get_scored_suggestions()[:TABLE_ROW_LIMIT]
 
 
 def get_dataframe():
@@ -91,7 +88,7 @@ def run_dashboard():
         guess_placeholder.selectbox('Guess', options=get_guess_options(), key="guess_updated")
         dataframe_placeholder.write(get_dataframe().to_html(), unsafe_allow_html=True, key="dataframe_updated")
 
-    df = pd.DataFrame(get_solver().get_scored_suggestions()[:SUGGESTION_LIMIT], columns=["Suggestion", "Score"])
+    df = pd.DataFrame(get_scored_suggestions(), columns=["Suggestion", "Score"])
     st.table(df)
 
 

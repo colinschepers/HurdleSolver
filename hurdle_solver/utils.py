@@ -5,34 +5,6 @@ from typing import List, Tuple
 from urllib import request
 
 
-class LimitedSizeMaxList(list):
-    def __init__(self, size_limit: int = None):
-        super().__init__()
-        self.size_limit = size_limit
-
-    def __len__(self):
-        return super().__len__()
-
-    def insert(self, index, value):
-        super().insert(index, value)
-        self._check_size_limit()
-
-    def append(self, value):
-        if not self.size_limit or len(self) < self.size_limit or value > self[-1]:
-            for i in range(len(self)):
-                if value > self[i]:
-                    self.insert(i, value)
-                    return
-            else:
-                super().append(value)
-                self._check_size_limit()
-
-    def _check_size_limit(self):
-        if self.size_limit is not None:
-            while len(self) > self.size_limit:
-                self.pop()
-
-
 @lru_cache(maxsize=10000000)
 def evaluate(guess: str, solution: str) -> Tuple[int, int]:
     """
@@ -65,7 +37,6 @@ def entropy(guess: str, solutions: List[str]) -> float:
     Calculates the entropy of a guess given a list of possible solutions.
     :param guess: the guessed word
     :param solutions: a list of remaining words, i.e. possible solutions of a game
-    :param evaluator: an evaluator
     :return: the entropy, a measure of how random something is
     """
     counts = defaultdict(int)

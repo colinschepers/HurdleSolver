@@ -5,9 +5,6 @@ from typing import List
 from hurdle_solver.solver import Solver
 from hurdle_solver.utils import get_all_words
 
-CACHE_PATH = "evaluator.cache"
-SUGGESTION_LIMIT = 50
-
 
 def main(guesses: List[str], num_greens: List[int], num_yellows: List[int]):
     vocab = set(get_all_words())
@@ -16,7 +13,7 @@ def main(guesses: List[str], num_greens: List[int], num_yellows: List[int]):
     for guess, num_green, num_yellow in zip(guesses, num_greens, num_yellows):
         solver.add_information(guess, num_green, num_yellow)
 
-    suggestions = solver.get_suggestions()[:SUGGESTION_LIMIT]
+    suggestions = solver.get_suggestions()
     print(f"Suggestions: {suggestions}")
 
     while len(suggestions) > 0:
@@ -32,7 +29,7 @@ def main(guesses: List[str], num_greens: List[int], num_yellows: List[int]):
             continue
 
         solver.add_information(guess, num_green, num_yellow)
-        suggestions = solver.get_suggestions()[:SUGGESTION_LIMIT]
+        suggestions = solver.get_suggestions()
         print(f"Suggestions: {suggestions}")
 
 

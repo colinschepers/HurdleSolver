@@ -1,5 +1,9 @@
 # Hurdle Solver 
-This application aims at helping to beat Hurdle (https://playhurdle.vercel.app), which is a Wordle meets Mastermind game.
+This application aims at helping to beat [Hurdle](https://playhurdle.vercel.app), 
+which is a [Wordle](https://www.nytimes.com/games/wordle/index.html) meets 
+[Mastermind](https://en.wikipedia.org/wiki/Mastermind_(board_game)) game.
+
+For more implementation details please refer to my [blog post](https://colinschepers.github.io/2023/hurdlesolver/).
 
 You can check out the application by **clicking the screenshot below**.
 
